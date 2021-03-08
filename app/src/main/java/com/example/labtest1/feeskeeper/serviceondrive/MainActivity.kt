@@ -38,13 +38,9 @@ class MainActivity : AppCompatActivity() {
         Accept = findViewById(R.id.accept)
 
 
-
         val db = Firebase.firestore
 
         val docRef = db.collection("ridedetails").document("ride")
-
-
-
 
 
          db.collection("ridedetails").document("ride")
@@ -61,14 +57,11 @@ class MainActivity : AppCompatActivity() {
                // println(snapshot.exists())
                 println("Current data: ${snapshot.get("firstName")   }")
 
-
-
-
                 title.text = "Riders Found "
                 fname.text = snapshot.get("firstName").toString()
                 lname.text = snapshot.get("lastNmae").toString()
-                destination.text = snapshot.get("destinationLongitude").toString()
-                currentloction.text =  snapshot.get("currentLongitude").toString()
+                destination.text = "Destination "  + snapshot.get("formattedDestination").toString()
+                currentloction.text = "Rider's current location "  + snapshot.get("formattedCurrentLocation").toString()
 
                 val imgData = snapshot.get("userImg").toString()
                 val k =  Base64.decode(imgData, Base64.DEFAULT)
@@ -86,18 +79,9 @@ class MainActivity : AppCompatActivity() {
                         "time" to 0.0
                     )
 
-
                     val db = Firebase.firestore
 
                     db.collection("ridedetails").document("ride").collection("driverDetails").document("details" ).set(docData)
-
-
-
-
-
-
-
-
 
 
                 }
@@ -112,21 +96,6 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-
-
-
-
     }
-
-
-
-
-
-
-
-
-
-
-
 
 }
