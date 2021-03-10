@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
             if (snapshot != null && snapshot.exists()) {
 
                // println(snapshot.exists())
-                println("Current data: ${snapshot.get("firstName")   }")
+                println("Current data: ${snapshot.get("firstName") }")
 
                 title.text = "Riders Found "
                 fname.text = snapshot.get("firstName").toString()
