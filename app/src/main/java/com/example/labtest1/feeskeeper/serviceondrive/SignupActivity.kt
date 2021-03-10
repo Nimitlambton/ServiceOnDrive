@@ -1,14 +1,20 @@
 package com.example.labtest1.feeskeeper.serviceondrive
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import android.provider.MediaStore
+import android.util.Base64
+import android.widget.*
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.labtest1.feeskeeper.serviceondrive.DbConfig.DriverDetails
 import com.example.labtest1.feeskeeper.serviceondrive.DbConfig.driverDetailsViewModel
+import java.io.ByteArrayOutputStream
 
 lateinit var loginbtn :TextView
 lateinit var firstname :EditText
@@ -16,7 +22,9 @@ lateinit var lastname :EditText
 lateinit var email :EditText
 lateinit var password :EditText
 lateinit var RegisterBtn : Button
-
+lateinit var imageView: ImageView
+lateinit var SetImageBtn :Button
+var imgData = ""
 private lateinit var DriverDetailsViewModel: driverDetailsViewModel
 
 class SignupActivity : AppCompatActivity() {
@@ -25,25 +33,154 @@ class SignupActivity : AppCompatActivity() {
         setContentView(R.layout.activity_signup)
 
 
-      //  DriverDetailsViewModel = ViewModelProvider(this).get(DriverDetailsViewModel::class.java)
+        if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.CAMERA)
+            == PackageManager.PERMISSION_DENIED)
 
-        loginbtn =  findViewById(R.id.login)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1)
+
+        DriverDetailsViewModel = ViewModelProvider(this).get(driverDetailsViewModel::class.java)
+
+
+
+
+        loginbtn = findViewById(R.id.login)
         firstname = findViewById(R.id.firstname)
         lastname = findViewById(R.id.lastname)
         email = findViewById(R.id.Email)
         password = findViewById(R.id.password)
-
+        RegisterBtn = findViewById(R.id.Registerbtn)
+        imageView  = findViewById(R.id.Dispic)
+        SetImageBtn = findViewById(R.id.SetImg)
 
 
         loginbtn.setOnClickListener {
-
             finish()
-
 
         }
 
 
+        RegisterBtn.setOnClickListener {
+
+
+            val firstname = firstname.text.toString()
+            val lastname = lastname.text.toString()
+            val email = email.text.toString()
+            val password = password.text.toString()
+
+            println("helloworld")
+
+            save(firstname, lastname, password, email, "aa")
+
+        }
+
+        SetImageBtn.setOnClickListener {
+
+            val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(cameraIntent  , 1)
+
+        }
 
 
     }
+
+
+
+    private fun save(
+        firstname: String,
+        lastname: String,
+        password: String,
+        email: String,
+        imgData: String
+    ) {
+
+        if (firstname == "") {
+
+            Toast.makeText(this, "Enter name", Toast.LENGTH_LONG).show()
+
+
+            return
+        } else if (lastname == "") {
+
+            Toast.makeText(this, "Enter last name", Toast.LENGTH_LONG).show()
+
+
+            return
+
+        } else if (password == "") {
+
+            Toast.makeText(this, "Enter password", Toast.LENGTH_LONG).show()
+
+
+            return
+
+        } else if (email == "") {
+
+            Toast.makeText(this, "Enter Email", Toast.LENGTH_LONG).show()
+
+
+            return
+
+        } else if (imgData == "") {
+
+            Toast.makeText(this, " please select image", Toast.LENGTH_LONG).show()
+
+
+            return
+
+        } else {
+
+
+            val userDetails = DriverDetails(
+                0,
+                firstname,
+                lastname,
+                email,
+                password,
+                imgData,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                "",
+                ""
+            )
+            DriverDetailsViewModel.insert(userDetails)
+            Toast.makeText(this, "YAYA! You are finally registered ..!!", Toast.LENGTH_LONG)
+                .show()
+            finish()
+
+        }
+
+
+    }
+
+
+
+    //Starting camera activity on result
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1) {
+
+
+
+            val photo: Bitmap = data?.extras?.get("data") as Bitmap
+            imageView.setImageBitmap(photo)
+
+
+            val byteArrayOutputStream =
+                ByteArrayOutputStream()
+            photo.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+            val byteArray = byteArrayOutputStream.toByteArray()
+
+
+            val encoded: String = Base64.encodeToString(byteArray, Base64.DEFAULT)
+
+            imgData = encoded
+
+        }
+    }
+
+
+
 }
+
