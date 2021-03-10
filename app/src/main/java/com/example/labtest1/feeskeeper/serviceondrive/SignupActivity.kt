@@ -38,7 +38,7 @@ class SignupActivity : AppCompatActivity() {
 
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1)
 
-        DriverDetailsViewModel = ViewModelProvider(this).get(driverDetailsViewModel::class.java)
+        DriverDetailsViewModel = ViewModelProvider(this).get(com.example.labtest1.feeskeeper.serviceondrive.DbConfig.driverDetailsViewModel::class.java)
 
 
 
