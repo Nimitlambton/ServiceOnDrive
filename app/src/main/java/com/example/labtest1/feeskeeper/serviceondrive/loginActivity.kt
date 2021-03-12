@@ -28,6 +28,7 @@ class loginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
 
+        //sudo commit..
         createbtn = findViewById(R.id.CreateAcc)
         login = findViewById(R.id.loginbtn)
 
