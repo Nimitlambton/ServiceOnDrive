@@ -22,6 +22,8 @@ private lateinit var driverDetailsViewModel: driverDetailsViewModel
 
 private lateinit var  currentDrivers :  List<DriverDetails>
 private lateinit var  currentDriver :  DriverDetails
+
+//dummy
 class loginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
