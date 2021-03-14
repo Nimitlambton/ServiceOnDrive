@@ -19,9 +19,8 @@ import java.io.ByteArrayOutputStream
 lateinit var loginbtn :TextView
 lateinit var firstname :EditText
 lateinit var lastname :EditText
-lateinit var email :EditText
-lateinit var password :EditText
-lateinit var RegisterBtn : Button
+
+
 lateinit var imageView: ImageView
 lateinit var SetImageBtn :Button
 var imgData = ""
@@ -40,13 +39,15 @@ class SignupActivity : AppCompatActivity() {
 
         DriverDetailsViewModel = ViewModelProvider(this).get(com.example.labtest1.feeskeeper.serviceondrive.DbConfig.driverDetailsViewModel::class.java)
 
+        var email :EditText
 
-
+         var password :EditText
+         var RegisterBtn : Button
 
         loginbtn = findViewById(R.id.login)
         firstname = findViewById(R.id.firstname)
         lastname = findViewById(R.id.lastname)
-        email = findViewById(R.id.Email)
+        email = findViewById(R.id.mail)
         password = findViewById(R.id.password)
         RegisterBtn = findViewById(R.id.Registerbtn)
         imageView  = findViewById(R.id.Dispic)

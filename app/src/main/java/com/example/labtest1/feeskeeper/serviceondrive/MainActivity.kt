@@ -1,17 +1,31 @@
 package com.example.labtest1.feeskeeper.serviceondrive
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.Base64
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import com.example.labtest1.feeskeeper.serviceondrive.DbConfig.DriverDetails
+import com.example.labtest1.feeskeeper.serviceondrive.DbConfig.driverDetailsViewModel
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import androidx.lifecycle.Observer
 
 
-class MainActivity : AppCompatActivity() {
+
+class MainActivity : AppCompatActivity() , LocationListener {
 
 
     private lateinit var title :TextView
@@ -20,13 +34,67 @@ class MainActivity : AppCompatActivity() {
     private lateinit var destination :TextView
     private lateinit var currentloction :TextView
     private lateinit var Accept :Button
+    private lateinit var DriverDetailsViewModel: driverDetailsViewModel
+    private lateinit var  currentDrivers :  List<DriverDetails>
 
+    private lateinit var cu : DriverDetails
 
+    private lateinit var locationManager: LocationManager
+    private lateinit var tvGpsLocation: TextView
 
-
+    private val locationPermissionCode = 2
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
+
+        getLocation()
+
+        cu = intent.getParcelableExtra("driverDetails")!!
+
+
+
+        DriverDetailsViewModel = ViewModelProvider(this).get(com.example.labtest1.feeskeeper.serviceondrive.DbConfig.driverDetailsViewModel::class.java)
+
+
+        DriverDetailsViewModel.alldata.observe(this, Observer { words ->
+            // Update the cached copy of the words in the adapter.
+            words?.let {
+
+
+                currentDrivers = it
+
+                println("helllllllooooworrllldd")
+                println("Size "+ currentDrivers.size)
+
+
+
+                currentDrivers.map {
+
+
+
+                    if(cu.DriverId == it.DriverId ){
+
+                        title.text = "welcome    " + it.FirstName
+                        cu = it
+
+
+                    }
+
+
+
+
+                }
+
+
+            }
+
+        })
+
+
+
+
 
         var riderImg = findViewById<ImageView>(R.id.riderimg)
 
@@ -36,6 +104,15 @@ class MainActivity : AppCompatActivity() {
         destination  = findViewById(R.id.Destination)
         currentloction = findViewById(R.id.currentlocation)
         Accept = findViewById(R.id.accept)
+
+
+
+
+
+
+
+
+
 
 
         val db = Firebase.firestore
@@ -57,7 +134,7 @@ class MainActivity : AppCompatActivity() {
                // println(snapshot.exists())
                 println("Current data: ${snapshot.get("firstName") }")
 
-                title.text = "Riders Found "
+               // title.text = "Riders Found "
                 fname.text = snapshot.get("firstName").toString()
                 lname.text = snapshot.get("lastNmae").toString()
                 destination.text = "Destination "  + snapshot.get("formattedDestination").toString()
@@ -72,16 +149,14 @@ class MainActivity : AppCompatActivity() {
                 Accept.setOnClickListener {
 
 
-                    val docData = hashMapOf(
-                        "DriverName" to "mohan",
-                        "DriverlastName" to "birjwasi",
-                        "currentAdrees" to 0.0 ,
-                        "time" to 0.0
-                    )
+
+
 
                     val db = Firebase.firestore
+                    db.collection("ridedetails").document("ride").collection("driverDetails").document("details" ).set(cu)
 
-                    db.collection("ridedetails").document("ride").collection("driverDetails").document("details" ).set(docData)
+
+
 
 
                 }
@@ -97,5 +172,42 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
+
+
+    private fun getLocation() {
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), locationPermissionCode)
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
+    }
+    override fun onLocationChanged(location: Location) {
+
+
+        println("hellowowlrf")
+        println(location.latitude)
+        println(location.longitude)
+
+
+        println(cu.FirstName)
+        //val cd = DriverDetails(cu.DriverId , cu.FirstName , )
+
+
+
+    }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == locationPermissionCode) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
+            }
+            else {
+                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
+
 
 }

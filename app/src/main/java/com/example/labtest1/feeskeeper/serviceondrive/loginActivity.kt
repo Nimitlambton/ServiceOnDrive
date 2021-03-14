@@ -1,6 +1,5 @@
 package com.example.labtest1.feeskeeper.serviceondrive
 
-import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -12,14 +11,14 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.labtest1.feeskeeper.serviceondrive.DbConfig.DriverDetails
 import com.example.labtest1.feeskeeper.serviceondrive.DbConfig.driverDetailsViewModel
+import kotlinx.android.synthetic.main.activity_login.*
 
 
 lateinit var createbtn : TextView
 lateinit var login :Button
-lateinit var mail : EditText
-lateinit var  pass :EditText
-private lateinit var driverDetailsViewModel: driverDetailsViewModel
 
+
+private lateinit var driverDetailsViewModel: driverDetailsViewModel
 private lateinit var  currentDrivers :  List<DriverDetails>
 private lateinit var  currentDriver :  DriverDetails
 
@@ -30,11 +29,12 @@ class loginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
 
-
+        var mail : EditText
+         var  pass :EditText
         createbtn = findViewById(R.id.CreateAcc)
         login = findViewById(R.id.loginbtn)
 
-        mail = findViewById(R.id.Email)
+        mail = findViewById(R.id.mail)
         pass =  findViewById(R.id.password)
 
         createbtn.setOnClickListener {
@@ -66,7 +66,7 @@ class loginActivity : AppCompatActivity() {
         login.setOnClickListener {
 
 
-            var emailtxt = email.text.toString()
+            var emailtxt = mail.text.toString()
             var  passtxt = password.text.toString()
 
             this.login(emailtxt , passtxt )

@@ -16,7 +16,7 @@ class DriverDetails (
     @ColumnInfo(name="Email") val Email:String,
     @ColumnInfo(name="Password") val Password:String,
     @ColumnInfo(name="UserImg") val UserImg:String,
-    @ColumnInfo(name="CurrentLatititue ") val CurrentLatititue:Double,
+    @ColumnInfo(name="CurrentLatititue ") var CurrentLatititue:Double,
     @ColumnInfo(name="currentLongitude ") val currentLongitude:Double,
     @ColumnInfo(name="DestinationLatititue ") val DestinationLatititue:Double,
     @ColumnInfo(name="DestinationLongitude ") val DestinationLongitude:Double,
