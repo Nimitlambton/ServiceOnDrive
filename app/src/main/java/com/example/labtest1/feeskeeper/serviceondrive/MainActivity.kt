@@ -190,9 +190,11 @@ class MainActivity : AppCompatActivity() , LocationListener {
         println(location.longitude)
 
 
-        println(cu.FirstName)
-        //val cd = DriverDetails(cu.DriverId , cu.FirstName , )
+        var lati = location.latitude
 
+        val cd = DriverDetails(cu.DriverId , cu.FirstName , cu.LastNmae , cu.Email , cu.Password  , lati.toString() ,   )
+
+       // DriverDetailsViewModel.update()
 
 
     }
