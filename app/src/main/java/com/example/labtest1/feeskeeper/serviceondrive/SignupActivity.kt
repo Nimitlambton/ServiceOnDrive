@@ -142,8 +142,11 @@ class SignupActivity : AppCompatActivity() {
                 0.0,
                 0.0,
                 0.0,
+                0.0,
+                0.0,
                 "",
                 ""
+
             )
             DriverDetailsViewModel.insert(userDetails)
             Toast.makeText(this, "YAYA! You are finally registered ..!!", Toast.LENGTH_LONG)

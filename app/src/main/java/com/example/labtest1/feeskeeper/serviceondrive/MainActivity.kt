@@ -2,6 +2,7 @@ package com.example.labtest1.feeskeeper.serviceondrive
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.location.Location
@@ -36,12 +37,14 @@ class MainActivity : AppCompatActivity() , LocationListener {
     private lateinit var Accept :Button
     private lateinit var DriverDetailsViewModel: driverDetailsViewModel
     private lateinit var  currentDrivers :  List<DriverDetails>
-
     private lateinit var cu : DriverDetails
-
     private lateinit var locationManager: LocationManager
     private lateinit var tvGpsLocation: TextView
 
+    var riderLatitude : Double  = 0.0
+    var riderLongitude :Double = 0.0
+    var destinationLatitue :Double =  0.0
+    var destinationLongitude :Double =  0.0
     private val locationPermissionCode = 2
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +64,7 @@ class MainActivity : AppCompatActivity() , LocationListener {
         DriverDetailsViewModel.alldata.observe(this, Observer { words ->
             // Update the cached copy of the words in the adapter.
             words?.let {
+
 
 
                 currentDrivers = it
@@ -85,15 +89,29 @@ class MainActivity : AppCompatActivity() , LocationListener {
 
 
 
+                    Accept.setOnClickListener {
+
+
+                        getLocation()
+
+
+                        val db = Firebase.firestore
+                        db.collection("ridedetails").document("ride").collection("driverDetails").document("details" ).set(cu)
+
+                        val togo = Intent(this , customerEnrouteMap::class.java)
+                        startActivity(togo)
+
+                    }
+
+
+
+
                 }
 
 
             }
 
         })
-
-
-
 
 
         var riderImg = findViewById<ImageView>(R.id.riderimg)
@@ -104,14 +122,6 @@ class MainActivity : AppCompatActivity() , LocationListener {
         destination  = findViewById(R.id.Destination)
         currentloction = findViewById(R.id.currentlocation)
         Accept = findViewById(R.id.accept)
-
-
-
-
-
-
-
-
 
 
 
@@ -139,33 +149,28 @@ class MainActivity : AppCompatActivity() , LocationListener {
                 lname.text = snapshot.get("lastNmae").toString()
                 destination.text = "Destination "  + snapshot.get("formattedDestination").toString()
                 currentloction.text = "Rider's current location "  + snapshot.get("formattedCurrentLocation").toString()
+                 val abc= snapshot.get("currentLatititue").toString()
+                riderLatitude = abc.toDouble()
+                val xyz  = snapshot.get("currentLongitude").toString()
+                riderLongitude =  xyz.toDouble()
+
+
+                val destilat= snapshot.get("destinationLatititue").toString()
+                destinationLatitue = destilat.toDouble()
+                val destilong  = snapshot.get("destinationLongitude").toString()
+                destinationLongitude = destilong.toDouble()
 
                 val imgData = snapshot.get("userImg").toString()
                 val k =  Base64.decode(imgData, Base64.DEFAULT)
                 val image = BitmapFactory.decodeByteArray(k, 0, k.size)
                 riderImg.setImageBitmap( image)
 
+                val cd = DriverDetails(cu.DriverId , cu.FirstName , cu.LastNmae , cu.Email , cu.Password  , cu.UserImg , cu.CurrentLatititue , cu.CurrentLatititue ,riderLatitude,riderLongitude,  destinationLatitue, destinationLongitude , cu.formattedDestination , cu.FormattedCurrentLocation)
 
-                Accept.setOnClickListener {
-
-
-
-
-
-                    val db = Firebase.firestore
-                    db.collection("ridedetails").document("ride").collection("driverDetails").document("details" ).set(cu)
-
-
-
-
-
-                }
-
-
+                DriverDetailsViewModel.update(cd)
 
 
             } else {
-
 
             }
         }
@@ -191,10 +196,11 @@ class MainActivity : AppCompatActivity() , LocationListener {
 
 
         var lati = location.latitude
+        var longi = location.longitude
 
-        val cd = DriverDetails(cu.DriverId , cu.FirstName , cu.LastNmae , cu.Email , cu.Password  , lati.toString() ,   )
+        val cd = DriverDetails(cu.DriverId , cu.FirstName , cu.LastNmae , cu.Email , cu.Password  , cu.UserImg , lati , longi ,cu.RidersLatititue,cu.RidersLongitude,  cu.DestinationLatititue, cu.DestinationLongitude , cu.formattedDestination , cu.FormattedCurrentLocation)
 
-       // DriverDetailsViewModel.update()
+        DriverDetailsViewModel.update(cd)
 
 
     }

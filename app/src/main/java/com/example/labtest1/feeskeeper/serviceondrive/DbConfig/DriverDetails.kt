@@ -18,6 +18,8 @@ class DriverDetails (
     @ColumnInfo(name="UserImg") val UserImg:String,
     @ColumnInfo(name="CurrentLatititue ") var CurrentLatititue:Double,
     @ColumnInfo(name="currentLongitude ") val currentLongitude:Double,
+    @ColumnInfo(name="RidersLatititue ") var RidersLatititue:Double,
+    @ColumnInfo(name="RiderstLongitude ") val RidersLongitude:Double,
     @ColumnInfo(name="DestinationLatititue ") val DestinationLatititue:Double,
     @ColumnInfo(name="DestinationLongitude ") val DestinationLongitude:Double,
     @ColumnInfo(name="FormattedDestination") val formattedDestination:String,
