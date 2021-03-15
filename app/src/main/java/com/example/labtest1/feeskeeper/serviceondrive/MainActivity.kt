@@ -46,6 +46,8 @@ class MainActivity : AppCompatActivity() , LocationListener {
     var destinationLatitue :Double =  0.0
     var destinationLongitude :Double =  0.0
     private val locationPermissionCode = 2
+    var currentlati :Double = 0.0
+    var currentlongi : Double = 0.0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -165,7 +167,7 @@ class MainActivity : AppCompatActivity() , LocationListener {
                 val image = BitmapFactory.decodeByteArray(k, 0, k.size)
                 riderImg.setImageBitmap( image)
 
-                val cd = DriverDetails(cu.DriverId , cu.FirstName , cu.LastNmae , cu.Email , cu.Password  , cu.UserImg , cu.CurrentLatititue , cu.CurrentLatititue ,riderLatitude,riderLongitude,  destinationLatitue, destinationLongitude , cu.formattedDestination , cu.FormattedCurrentLocation)
+                val cd = DriverDetails(cu.DriverId , cu.FirstName , cu.LastNmae , cu.Email , cu.Password  , cu.UserImg , cu.CurrentLatititue , cu.currentLongitude ,riderLatitude,riderLongitude,  destinationLatitue, destinationLongitude , cu.formattedDestination , cu.FormattedCurrentLocation)
 
                 DriverDetailsViewModel.update(cd)
 
@@ -195,10 +197,10 @@ class MainActivity : AppCompatActivity() , LocationListener {
         println(location.longitude)
 
 
-        var lati = location.latitude
-        var longi = location.longitude
+       currentlati = location.latitude
+       currentlongi = location.longitude
 
-        val cd = DriverDetails(cu.DriverId , cu.FirstName , cu.LastNmae , cu.Email , cu.Password  , cu.UserImg , lati , longi ,cu.RidersLatititue,cu.RidersLongitude,  cu.DestinationLatititue, cu.DestinationLongitude , cu.formattedDestination , cu.FormattedCurrentLocation)
+        val cd = DriverDetails(cu.DriverId , cu.FirstName , cu.LastNmae , cu.Email , cu.Password  , cu.UserImg , currentlati, currentlongi ,cu.RidersLatititue,cu.RidersLongitude,  cu.DestinationLatititue, cu.DestinationLongitude , cu.formattedDestination , cu.FormattedCurrentLocation)
 
         DriverDetailsViewModel.update(cd)
 
