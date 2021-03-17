@@ -1,9 +1,19 @@
 package com.example.labtest1.feeskeeper.serviceondrive
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
-import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -18,20 +28,26 @@ import com.lambtonserviceon.models.directions.Step
 import okhttp3.*
 import java.io.IOException
 
-class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerClickListener {
+class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerClickListener  ,
+    LocationListener {
+
 
 
     private lateinit var mMap: GoogleMap
     private lateinit var myMarker: Marker
-    private var driverLocation = LatLng(0.0 , 0.0)
+    private var driverLocation = LatLng(0.0, 0.0)
 
-    private var destinationlocation = LatLng(0.0 , 0.0)
+    private var destinationlocation = LatLng(0.0, 0.0)
 
     //Current location
-    private var riderlocation = LatLng(0.0 , 0.0)
+    private var riderlocation = LatLng(0.0, 0.0)
     private val client = OkHttpClient()
-    private lateinit var  decodedPolyLine : List <LatLng>
+    private lateinit var decodedPolyLine: List<LatLng>
 
+    lateinit var geofencingClient: GeofencingClient
+
+    private lateinit var locationManager: LocationManager
+    private val locationPermissionCode = 2
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_customer_enroute_map)
@@ -42,15 +58,19 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
         mapFragment.getMapAsync(this)
 
 
-
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
 
+        getLocation()
+
+        geofencingClient = LocationServices.getGeofencingClient(this)
+
 
         val db = Firebase.firestore
 
-        val docRef = db.collection("ridedetails").document("ride").collection("driverDetails").document("details" )
+        val docRef = db.collection("ridedetails").document("ride").collection("driverDetails")
+            .document("details")
         db.collection("ridedetails").document("ride")
 
 
@@ -63,24 +83,22 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
             if (snapshot != null && snapshot.exists()) {
 
                 println("DRIVER DETAILS SUCCESS")
+                println("Current data: ${snapshot.get("firstName")}")
+
+                val lati = snapshot.get("ridersLatititue").toString()
+                val longi = snapshot.get("ridersLongitude").toString()
+
+                riderlocation = LatLng(lati.toDouble(), longi.toDouble())
+
+                val Driverlati = snapshot.get("currentLatititue").toString()
+                val Driverlongi = snapshot.get("currentLongitude").toString()
+                driverLocation = LatLng(Driverlati.toDouble(), Driverlongi.toDouble())
 
 
-                println("Current data: ${snapshot.get("firstName") }")
+                val destilati = snapshot.get("destinationLatititue").toString()
+                val destilongi = snapshot.get("destinationLongitude").toString()
 
-                val lati  =  snapshot.get("ridersLatititue").toString()
-                val longi =  snapshot.get("ridersLongitude").toString()
-
-                riderlocation = LatLng(lati.toDouble() , longi.toDouble())
-
-                val Driverlati  =  snapshot.get("currentLatititue").toString()
-                val Driverlongi =  snapshot.get("currentLongitude").toString()
-                driverLocation = LatLng(Driverlati.toDouble() , Driverlongi.toDouble())
-
-
-                val destilati  =  snapshot.get("destinationLatititue").toString()
-                val destilongi =  snapshot.get("destinationLongitude").toString()
-
-                destinationlocation  = LatLng(destilati.toDouble() , destilongi.toDouble())
+                destinationlocation = LatLng(destilati.toDouble(), destilongi.toDouble())
 
 
                 mMap = googleMap
@@ -88,23 +106,32 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
                 myMarker = mMap.addMarker(
                     MarkerOptions().icon(
                         BitmapDescriptorFactory.defaultMarker(
-                            BitmapDescriptorFactory.HUE_AZURE)) .position(driverLocation).title("you"))
+                            BitmapDescriptorFactory.HUE_AZURE
+                        )
+                    ).position(driverLocation).title("you")
+                )
                 myMarker.showInfoWindow()
 
 
                 myMarker =
                     mMap.addMarker(
-                        MarkerOptions() .icon(
+                        MarkerOptions().icon(
                             BitmapDescriptorFactory.defaultMarker(
-                                BitmapDescriptorFactory.HUE_GREEN))
-                        .position(riderlocation).title("Pickup Location"))
+                                BitmapDescriptorFactory.HUE_GREEN
+                            )
+                        )
+                            .position(riderlocation).title("Pickup Location")
+                    )
 
                 myMarker =
                     mMap.addMarker(
-                        MarkerOptions() .icon(
+                        MarkerOptions().icon(
                             BitmapDescriptorFactory.defaultMarker(
-                                BitmapDescriptorFactory.HUE_YELLOW))
-                            .position(destinationlocation).title("Destination!!"))
+                                BitmapDescriptorFactory.HUE_YELLOW
+                            )
+                        )
+                            .position(destinationlocation).title("Destination!!")
+                    )
 
 
 
@@ -115,11 +142,11 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
                 val url = getURL(driverLocation, riderlocation)
 
-                val url2  =  getURL(riderlocation , destinationlocation)
+                val url2 = getURL(riderlocation, destinationlocation)
                 println(url)
-                this.run(url , "GREEN")
+                this.run(url, "GREEN")
                 println(url2)
-                this.run(url2 ,  "RED")
+                this.run(url2, "RED")
 
             } else {
 
@@ -148,7 +175,7 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
     }
 
 
-    fun run(url: String , color : String) {
+    fun run(url: String, color: String) {
 
         val request = Request.Builder()
             .url(url)
@@ -168,18 +195,16 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
                 var Direction2 = gson.fromJson(response.body?.string(), Direction::class.java)
 
                 //function to fetch steps and pass to ADD polyline
-                addPolyLines(Direction2.routes[0].legs[0].steps ,  color)
+                addPolyLines(Direction2.routes[0].legs[0].steps, color)
             }
 
         })
 
 
-
     }
 
 
-
-    private fun addPolyLines(steps: List<Step> , color:String) {
+    private fun addPolyLines(steps: List<Step>, color: String) {
 
         val path: MutableList<List<LatLng>> = ArrayList()
 
@@ -189,21 +214,18 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
         }
 
+        val polylines: List<Polyline> = ArrayList()
         runOnUiThread {
 
-            val  polyLineOption = PolylineOptions()
 
+            val polyLineOption = PolylineOptions()
 
-
-
-
-
-            if (color == "RED"){
+            if (color == "RED") {
 
                 val col1 = Color.RED
                 polyLineOption.color(col1)
 
-            }else {
+            } else {
 
                 val color2 = Color.YELLOW
                 polyLineOption.color(color2)
@@ -211,11 +233,68 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
 
 
-            for(p in path)
+            for (p in path)
                 polyLineOption.addAll(p)
+
 
             val polyline = mMap.addPolyline(polyLineOption)
 
+
+
+
+        }
+
+
+
+
+    }
+
+    private fun getLocation() {
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if ((ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED)
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                locationPermissionCode
+            )
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
+    }
+
+
+    override fun onLocationChanged(location: Location) {
+
+        val db = Firebase.firestore
+
+        val docRef = db.collection("ridedetails").document("ride").collection("driverDetails").document("details" )
+        db.collection("ridedetails").document("ride")
+
+        docRef.update("currentLatititue",location.latitude)
+        docRef.update("currentLongitude",location.longitude)
+
+
+        println("hey this is called!!")
+//        println(location.latitude)
+//        println(location.longitude)
+
+
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == locationPermissionCode) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
+            }
         }
 
 

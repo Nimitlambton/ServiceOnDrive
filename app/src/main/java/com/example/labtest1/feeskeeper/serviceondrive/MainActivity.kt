@@ -29,6 +29,7 @@ import androidx.lifecycle.Observer
 class MainActivity : AppCompatActivity() , LocationListener {
 
 
+
     private lateinit var title :TextView
     private lateinit var fname :TextView
     private lateinit var lname :TextView
@@ -39,7 +40,7 @@ class MainActivity : AppCompatActivity() , LocationListener {
     private lateinit var  currentDrivers :  List<DriverDetails>
     private lateinit var cu : DriverDetails
     private lateinit var locationManager: LocationManager
-    private lateinit var tvGpsLocation: TextView
+
 
     var riderLatitude : Double  = 0.0
     var riderLongitude :Double = 0.0
@@ -104,9 +105,6 @@ class MainActivity : AppCompatActivity() , LocationListener {
                         startActivity(togo)
 
                     }
-
-
-
 
                 }
 
