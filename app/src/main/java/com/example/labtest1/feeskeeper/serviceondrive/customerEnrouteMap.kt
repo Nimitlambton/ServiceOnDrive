@@ -28,11 +28,12 @@ import com.lambtonserviceon.models.directions.Step
 import okhttp3.*
 import java.io.IOException
 
+
 class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerClickListener  ,
     LocationListener {
 
-
-
+    private lateinit var url:String
+    private lateinit var url2:String
     private lateinit var mMap: GoogleMap
     private lateinit var myMarker: Marker
     private var driverLocation = LatLng(0.0, 0.0)
@@ -45,6 +46,9 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
     private lateinit var decodedPolyLine: List<LatLng>
 
     lateinit var geofencingClient: GeofencingClient
+
+    var polylines: MutableList<Polyline> = mutableListOf<Polyline>()
+
 
     private lateinit var locationManager: LocationManager
     private val locationPermissionCode = 2
@@ -62,7 +66,7 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
     override fun onMapReady(googleMap: GoogleMap) {
 
-        getLocation()
+
 
         geofencingClient = LocationServices.getGeofencingClient(this)
 
@@ -102,7 +106,9 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
 
                 mMap = googleMap
+                getLocation()
                 mMap.clear()
+
                 myMarker = mMap.addMarker(
                     MarkerOptions().icon(
                         BitmapDescriptorFactory.defaultMarker(
@@ -140,9 +146,9 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
                 mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(driverLocation, 10f))
 
 
-                val url = getURL(driverLocation, riderlocation)
+                 url = getURL(driverLocation, riderlocation)
 
-                val url2 = getURL(riderlocation, destinationlocation)
+                url2 = getURL(riderlocation, destinationlocation)
                 println(url)
                 this.run(url, "GREEN")
                 println(url2)
@@ -214,12 +220,16 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
         }
 
-        val polylines: List<Polyline> = ArrayList()
+
+
         runOnUiThread {
 
 
-            val polyLineOption = PolylineOptions()
 
+
+
+
+            val polyLineOption = PolylineOptions()
             if (color == "RED") {
 
                 val col1 = Color.RED
@@ -234,11 +244,12 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
 
             for (p in path)
+
                 polyLineOption.addAll(p)
 
+        //  val  polyline =   mMap.addPolyline(polyLineOption)
 
-            val polyline = mMap.addPolyline(polyLineOption)
-
+            polylines.add(mMap.addPolyline(polyLineOption));
 
 
 
@@ -263,10 +274,31 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
             )
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
+
+
+
+
+
+
+
+
     }
 
 
     override fun onLocationChanged(location: Location) {
+
+        for (line in polylines) {
+
+            line.remove()
+
+
+        }
+        polylines.clear()
+
+        this.run(url, "GREEN")
+        println(url2)
+        this.run(url2, "RED")
+
 
         val db = Firebase.firestore
 

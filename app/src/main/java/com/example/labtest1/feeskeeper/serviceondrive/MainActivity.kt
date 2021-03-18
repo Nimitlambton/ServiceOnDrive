@@ -29,7 +29,7 @@ import androidx.lifecycle.Observer
 class MainActivity : AppCompatActivity() , LocationListener {
 
 
-
+//dummy
     private lateinit var title :TextView
     private lateinit var fname :TextView
     private lateinit var lname :TextView
