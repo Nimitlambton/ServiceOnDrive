@@ -40,7 +40,7 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
     private var destinationlocation = LatLng(0.0, 0.0)
 
-    //Current location
+
     private var riderlocation = LatLng(0.0, 0.0)
     private val client = OkHttpClient()
     private lateinit var decodedPolyLine: List<LatLng>
