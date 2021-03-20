@@ -29,7 +29,6 @@ import androidx.lifecycle.Observer
 class MainActivity : AppCompatActivity() , LocationListener {
 
 
-//dummy
     private lateinit var title :TextView
     private lateinit var fname :TextView
     private lateinit var lname :TextView
@@ -49,6 +48,8 @@ class MainActivity : AppCompatActivity() , LocationListener {
     private val locationPermissionCode = 2
     var currentlati :Double = 0.0
     var currentlongi : Double = 0.0
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -91,16 +92,12 @@ class MainActivity : AppCompatActivity() , LocationListener {
 
 
 
-
                     Accept.setOnClickListener {
 
 
                         getLocation()
-
-
                         val db = Firebase.firestore
                         db.collection("ridedetails").document("ride").collection("driverDetails").document("details" ).set(cu)
-
                         val togo = Intent(this , customerEnrouteMap::class.java)
                         startActivity(togo)
 
@@ -177,9 +174,6 @@ class MainActivity : AppCompatActivity() , LocationListener {
 
 
     }
-
-
-
     private fun getLocation() {
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
@@ -188,12 +182,6 @@ class MainActivity : AppCompatActivity() , LocationListener {
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
     }
     override fun onLocationChanged(location: Location) {
-
-
-        println("hellowowlrf")
-        println(location.latitude)
-        println(location.longitude)
-
 
        currentlati = location.latitude
        currentlongi = location.longitude

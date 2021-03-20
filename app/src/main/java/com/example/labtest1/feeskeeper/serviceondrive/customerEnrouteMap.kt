@@ -1,6 +1,7 @@
 package com.example.labtest1.feeskeeper.serviceondrive
 
 import android.Manifest
+import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -12,57 +13,60 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.gms.tasks.OnFailureListener
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.google.maps.android.PolyUtil
 import com.lambtonserviceon.models.directions.Direction
 import com.lambtonserviceon.models.directions.Step
+import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
 import java.io.IOException
 
 
-class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerClickListener  ,
-    LocationListener {
+private lateinit var url:String
+private lateinit var url2:String
+private lateinit var mMap: GoogleMap
+private lateinit var myMarker: Marker
+private var driverLocation = LatLng(0.0, 0.0)
+private var destinationlocation = LatLng(0.0, 0.0)
+private var riderlocation = LatLng(0.0, 0.0)
+private val client = OkHttpClient()
+private lateinit var decodedPolyLine: List<LatLng>
 
-    private lateinit var url:String
-    private lateinit var url2:String
-    private lateinit var mMap: GoogleMap
-    private lateinit var myMarker: Marker
-    private var driverLocation = LatLng(0.0, 0.0)
+//private lateinit var: CircleOptions
+lateinit var geofencingClient: GeofencingClient
+var polylines: MutableList<Polyline> = mutableListOf<Polyline>()
+private lateinit var locationManager: LocationManager
+private val locationPermissionCode = 2
 
-    private var destinationlocation = LatLng(0.0, 0.0)
-
-
-    private var riderlocation = LatLng(0.0, 0.0)
-    private val client = OkHttpClient()
-    private lateinit var decodedPolyLine: List<LatLng>
-
-    lateinit var geofencingClient: GeofencingClient
-
-    var polylines: MutableList<Polyline> = mutableListOf<Polyline>()
+private lateinit var geofencehelper : GeofenceHelper
 
 
-    private lateinit var locationManager: LocationManager
-    private val locationPermissionCode = 2
+
+class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerClickListener  , LocationListener {
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_customer_enroute_map)
-
 
         //setting up Googlemap
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-
     }
+
 
     override fun onMapReady(googleMap: GoogleMap) {
 
@@ -71,8 +75,11 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
         geofencingClient = LocationServices.getGeofencingClient(this)
 
 
-        val db = Firebase.firestore
+       geofencehelper  = GeofenceHelper(this)
 
+
+
+        val db = Firebase.firestore
         val docRef = db.collection("ridedetails").document("ride").collection("driverDetails")
             .document("details")
         db.collection("ridedetails").document("ride")
@@ -103,7 +110,6 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
                 val destilongi = snapshot.get("destinationLongitude").toString()
 
                 destinationlocation = LatLng(destilati.toDouble(), destilongi.toDouble())
-
 
                 mMap = googleMap
                 getLocation()
@@ -146,7 +152,9 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
                 mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(driverLocation, 10f))
 
 
-                 url = getURL(driverLocation, riderlocation)
+                addCircle(riderlocation , 200F , "riderlocation")
+                addCircle(destinationlocation , 200F , "destinationlocation")
+                 url = getURL(driverLocation, riderlocation )
 
                 url2 = getURL(riderlocation, destinationlocation)
                 println(url)
@@ -191,7 +199,9 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
 
             override fun onFailure(call: Call, e: IOException) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+
+               println("hey its failed..!")
 
             }
 
@@ -214,20 +224,19 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
         val path: MutableList<List<LatLng>> = ArrayList()
 
-        for (step in steps) {
-            decodedPolyLine = PolyUtil.decode(step.polyline.points);
-            path.add(decodedPolyLine)
+        if(steps !== null){
 
+            for (step in steps) {
+                decodedPolyLine = PolyUtil.decode(step.polyline.points);
+                path.add(decodedPolyLine)
+
+            }
         }
 
 
 
+
         runOnUiThread {
-
-
-
-
-
 
             val polyLineOption = PolylineOptions()
             if (color == "RED") {
@@ -242,23 +251,19 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
             }
 
 
+                for (p in path)
 
-            for (p in path)
+                    polyLineOption.addAll(p)
 
-                polyLineOption.addAll(p)
-
-        //  val  polyline =   mMap.addPolyline(polyLineOption)
-
-            polylines.add(mMap.addPolyline(polyLineOption));
-
+                polylines.add(mMap.addPolyline(polyLineOption));
 
 
         }
 
-
-
-
     }
+
+
+
 
     private fun getLocation() {
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -275,10 +280,56 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
 
+    }
+
+
+    private fun addCircle(latLng: LatLng , radi: Float , ID : String) {
+        val ci =  CircleOptions()
+        ci.center(latLng)
+        ci.radius(radi.toDouble())
+        ci.strokeColor(Color.argb(255,255,0,0))
+        ci.fillColor(Color.argb(64,255,0,0))
+        ci.strokeWidth(4F)
+        mMap.addCircle(ci)
+
+
+        addgeofence(latLng , radi  ,ID)
+
+
+    }
+
+    private  fun addgeofence(latLng: LatLng , radi: Float , ID:String){
 
 
 
+        val Geofence = geofencehelper.getGeofence(ID ,  latLng ,radi , Geofence.GEOFENCE_TRANSITION_ENTER )!!
 
+      val   GeofencingRequest =  geofencehelper.getGeofencingRequest(Geofence)
+
+        val pd   =  geofencehelper.getPendingIntent()
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        geofencingClient.addGeofences(GeofencingRequest , pd).addOnFailureListener(OnFailureListener {
+
+
+            println(it.message)
+
+            println("yelo youu fucking ffnalksdjadwadasdadas"+it)
+
+        })
 
 
 
@@ -290,30 +341,19 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
         for (line in polylines) {
 
             line.remove()
-
-
         }
         polylines.clear()
-
         this.run(url, "GREEN")
         println(url2)
         this.run(url2, "RED")
 
-
         val db = Firebase.firestore
-
         val docRef = db.collection("ridedetails").document("ride").collection("driverDetails").document("details" )
         db.collection("ridedetails").document("ride")
 
         docRef.update("currentLatititue",location.latitude)
         docRef.update("currentLongitude",location.longitude)
-
-
         println("hey this is called!!")
-//        println(location.latitude)
-//        println(location.longitude)
-
-
     }
 
     override fun onRequestPermissionsResult(
@@ -331,4 +371,8 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
 
     }
+
+
+
+
 }
