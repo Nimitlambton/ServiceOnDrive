@@ -145,7 +145,10 @@ class SignupActivity : AppCompatActivity() {
                 0.0,
                 0.0,
                 "",
-                ""
+                "",
+                "",
+                false
+
 
             )
             DriverDetailsViewModel.insert(userDetails)

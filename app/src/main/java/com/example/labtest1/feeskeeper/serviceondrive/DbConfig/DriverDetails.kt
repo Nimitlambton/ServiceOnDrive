@@ -23,6 +23,8 @@ class DriverDetails (
     @ColumnInfo(name="DestinationLatititue ") val DestinationLatititue:Double,
     @ColumnInfo(name="DestinationLongitude ") val DestinationLongitude:Double,
     @ColumnInfo(name="FormattedDestination") val formattedDestination:String,
-    @ColumnInfo(name="FormattedCurrentLocation") val FormattedCurrentLocation:String
+    @ColumnInfo(name="FormattedCurrentLocation") val FormattedCurrentLocation:String,
+    @ColumnInfo(name="rideStatus") val rideStatus:String,
+    @ColumnInfo(name="riderborded") val riderborded:Boolean
 ) : Parcelable
 

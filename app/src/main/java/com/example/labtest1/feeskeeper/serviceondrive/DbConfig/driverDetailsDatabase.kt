@@ -8,7 +8,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Database(entities = arrayOf(DriverDetails::class), version = 2, exportSchema = false)
+@Database(entities = arrayOf(DriverDetails::class), version = 5, exportSchema = false)
 abstract class driverDetailsDatabase :RoomDatabase () {
 
     abstract fun driverDetailsDao(): driverDetailsDao

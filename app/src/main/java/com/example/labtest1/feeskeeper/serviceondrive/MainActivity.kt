@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity() , LocationListener {
                 val image = BitmapFactory.decodeByteArray(k, 0, k.size)
                 riderImg.setImageBitmap( image)
 
-                val cd = DriverDetails(cu.DriverId , cu.FirstName , cu.LastNmae , cu.Email , cu.Password  , cu.UserImg , cu.CurrentLatititue , cu.currentLongitude ,riderLatitude,riderLongitude,  destinationLatitue, destinationLongitude , cu.formattedDestination , cu.FormattedCurrentLocation)
+                val cd = DriverDetails(cu.DriverId , cu.FirstName , cu.LastNmae , cu.Email , cu.Password  , cu.UserImg , cu.CurrentLatititue , cu.currentLongitude ,riderLatitude,riderLongitude,  destinationLatitue, destinationLongitude , cu.formattedDestination , cu.FormattedCurrentLocation,"",false)
 
                 DriverDetailsViewModel.update(cd)
 
@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() , LocationListener {
        currentlati = location.latitude
        currentlongi = location.longitude
 
-        val cd = DriverDetails(cu.DriverId , cu.FirstName , cu.LastNmae , cu.Email , cu.Password  , cu.UserImg , currentlati, currentlongi ,cu.RidersLatititue,cu.RidersLongitude,  cu.DestinationLatititue, cu.DestinationLongitude , cu.formattedDestination , cu.FormattedCurrentLocation)
+        val cd = DriverDetails(cu.DriverId , cu.FirstName , cu.LastNmae , cu.Email , cu.Password  , cu.UserImg , currentlati, currentlongi ,cu.RidersLatititue,cu.RidersLongitude,  cu.DestinationLatititue, cu.DestinationLongitude , cu.formattedDestination , cu.FormattedCurrentLocation,"",false)
 
         DriverDetailsViewModel.update(cd)
 

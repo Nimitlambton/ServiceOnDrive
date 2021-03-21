@@ -1,7 +1,6 @@
 package com.example.labtest1.feeskeeper.serviceondrive
 
 import android.Manifest
-import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -15,7 +14,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
-import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -29,7 +27,6 @@ import com.google.gson.Gson
 import com.google.maps.android.PolyUtil
 import com.lambtonserviceon.models.directions.Direction
 import com.lambtonserviceon.models.directions.Step
-import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
 import java.io.IOException
 
@@ -70,14 +67,8 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
     override fun onMapReady(googleMap: GoogleMap) {
 
-
-
         geofencingClient = LocationServices.getGeofencingClient(this)
-
-
        geofencehelper  = GeofenceHelper(this)
-
-
 
         val db = Firebase.firestore
         val docRef = db.collection("ridedetails").document("ride").collection("driverDetails")
@@ -152,8 +143,44 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
                 mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(driverLocation, 10f))
 
 
-                addCircle(riderlocation , 200F , "riderlocation")
-                addCircle(destinationlocation , 200F , "destinationlocation")
+
+                val riderstatus = snapshot.get("rideStatus").toString()
+
+                val riderboardedcheck =  snapshot.get("riderborded").toString()
+
+                if(  riderstatus == ""){
+
+                    println("riderlocation empty")
+
+                    addCircle(riderlocation , 200F , "riderlocation")
+
+
+                }else if ( riderstatus == "riderlocation"  ){
+
+
+                    if (riderboardedcheck == "true"){
+
+                        addCircle(destinationlocation , 200F , "destinationlocation")
+
+                    }
+
+
+                }
+
+
+
+
+                else if(riderstatus == "destinationlocation" ){
+
+                    println( "riders reached at destination with pay to the rider ")
+                    for (line in polylines) {
+
+                        line.remove()
+                    }
+                    polylines.clear()
+
+                }
+
                  url = getURL(driverLocation, riderlocation )
 
                 url2 = getURL(riderlocation, destinationlocation)
@@ -200,9 +227,7 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
             override fun onFailure(call: Call, e: IOException) {
 
-
                println("hey its failed..!")
-
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -291,8 +316,6 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
         ci.fillColor(Color.argb(64,255,0,0))
         ci.strokeWidth(4F)
         mMap.addCircle(ci)
-
-
         addgeofence(latLng , radi  ,ID)
 
 
@@ -302,7 +325,7 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
 
 
-        val Geofence = geofencehelper.getGeofence(ID ,  latLng ,radi , Geofence.GEOFENCE_TRANSITION_ENTER )!!
+        val Geofence = geofencehelper.getGeofence(ID ,  latLng ,radi ,  Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_DWELL or Geofence.GEOFENCE_TRANSITION_EXIT )
 
       val   GeofencingRequest =  geofencehelper.getGeofencingRequest(Geofence)
 
