@@ -40,7 +40,7 @@ private var destinationlocation = LatLng(0.0, 0.0)
 private var riderlocation = LatLng(0.0, 0.0)
 private val client = OkHttpClient()
 private lateinit var decodedPolyLine: List<LatLng>
-
+private lateinit var  riderstatus : String
 //private lateinit var: CircleOptions
 lateinit var geofencingClient: GeofencingClient
 var polylines: MutableList<Polyline> = mutableListOf<Polyline>()
@@ -144,12 +144,27 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
 
 
-                val riderstatus = snapshot.get("rideStatus").toString()
+                 riderstatus = snapshot.get("rideStatus").toString()
 
                 val riderboardedcheck =  snapshot.get("riderborded").toString()
 
-                if(  riderstatus == ""){
+                url = getURL(driverLocation, riderlocation )
+                url2 = getURL(riderlocation, destinationlocation)
+//
+//                this.run(url, "GREEN")
+//
+//                this.run(url2, "RED")
 
+
+                if(  riderstatus == ""){
+                    for (line in polylines) {
+
+                        line.remove()
+                    }
+                    polylines.clear()
+
+
+                    this.run(url, "GREEN")
                     println("riderlocation empty")
 
                     addCircle(riderlocation , 200F , "riderlocation")
@@ -157,37 +172,36 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
                 }else if ( riderstatus == "riderlocation"  ){
 
-
-                    if (riderboardedcheck == "true"){
-
-                        addCircle(destinationlocation , 200F , "destinationlocation")
-
-                    }
-
-
-                }
-
-
-
-
-                else if(riderstatus == "destinationlocation" ){
-
-                    println( "riders reached at destination with pay to the rider ")
                     for (line in polylines) {
 
                         line.remove()
                     }
                     polylines.clear()
 
+
+                    this.run(url2, "RED")
+                    if (riderboardedcheck == "true"){
+
+                        addCircle(destinationlocation , 200F , "destinationlocation")
+
+                    }
+
                 }
 
-                 url = getURL(driverLocation, riderlocation )
+                else if(riderstatus == "destinationlocation" ){
 
-                url2 = getURL(riderlocation, destinationlocation)
-                println(url)
-                this.run(url, "GREEN")
-                println(url2)
-                this.run(url2, "RED")
+                    for (line in polylines) {
+
+                        line.remove()
+                    }
+                    polylines.clear()
+
+                    println( "riders reached at destination with pay to the rider ")
+
+
+                }
+
+
 
             } else {
 
@@ -258,9 +272,6 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
             }
         }
 
-
-
-
         runOnUiThread {
 
             val polyLineOption = PolylineOptions()
@@ -291,6 +302,7 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
 
     private fun getLocation() {
+
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         if ((ContextCompat.checkSelfPermission(
                 this,
@@ -350,7 +362,7 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
             println(it.message)
 
-            println("yelo youu fucking ffnalksdjadwadasdadas"+it)
+
 
         })
 
@@ -361,22 +373,34 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
     override fun onLocationChanged(location: Location) {
 
-        for (line in polylines) {
-
-            line.remove()
-        }
-        polylines.clear()
-        this.run(url, "GREEN")
-        println(url2)
-        this.run(url2, "RED")
-
         val db = Firebase.firestore
         val docRef = db.collection("ridedetails").document("ride").collection("driverDetails").document("details" )
         db.collection("ridedetails").document("ride")
 
         docRef.update("currentLatititue",location.latitude)
         docRef.update("currentLongitude",location.longitude)
-        println("hey this is called!!")
+
+
+      if (  riderstatus   != "destinationlocation" ) {
+
+
+         println("hey its chnagde to location !!!!")
+
+          for (line in polylines) {
+
+              line.remove()
+          }
+          polylines.clear()
+
+
+          this.run(url, "GREEN")
+          println(url2)
+          this.run(url2, "RED")
+
+
+      }
+
+
     }
 
     override fun onRequestPermissionsResult(
