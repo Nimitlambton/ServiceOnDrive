@@ -49,7 +49,7 @@ private val locationPermissionCode = 2
 
 private lateinit var geofencehelper : GeofenceHelper
 
-
+private var  riderboardedcheck  = ""
 
 class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerClickListener  , LocationListener {
 
@@ -143,28 +143,20 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
                 mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(driverLocation, 10f))
 
 
-
                  riderstatus = snapshot.get("rideStatus").toString()
 
-                val riderboardedcheck =  snapshot.get("riderborded").toString()
+                 riderboardedcheck =  snapshot.get("riderborded").toString()
 
                 url = getURL(driverLocation, riderlocation )
                 url2 = getURL(riderlocation, destinationlocation)
-//
-//                this.run(url, "GREEN")
-//
-//                this.run(url2, "RED")
 
 
                 if(  riderstatus == ""){
-                    for (line in polylines) {
 
-                        line.remove()
-                    }
-                    polylines.clear()
-
+                  removepoly()
 
                     this.run(url, "GREEN")
+                    this.run(url2, "RED")
                     println("riderlocation empty")
 
                     addCircle(riderlocation , 200F , "riderlocation")
@@ -172,16 +164,10 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
                 }else if ( riderstatus == "riderlocation"  ){
 
-                    for (line in polylines) {
 
-                        line.remove()
-                    }
-                    polylines.clear()
-
-
-                    this.run(url2, "RED")
                     if (riderboardedcheck == "true"){
-
+                        removepoly()
+                          this.run(url2, "RED")
                         addCircle(destinationlocation , 200F , "destinationlocation")
 
                     }
@@ -190,11 +176,7 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
 
                 else if(riderstatus == "destinationlocation" ){
 
-                    for (line in polylines) {
-
-                        line.remove()
-                    }
-                    polylines.clear()
+                  removepoly()
 
                     println( "riders reached at destination with pay to the rider ")
 
@@ -374,36 +356,103 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
     override fun onLocationChanged(location: Location) {
 
         val db = Firebase.firestore
-        val docRef = db.collection("ridedetails").document("ride").collection("driverDetails").document("details" )
+        val docRef = db.collection("ridedetails").document("ride").collection("driverDetails")
+            .document("details")
         db.collection("ridedetails").document("ride")
 
-        docRef.update("currentLatititue",location.latitude)
-        docRef.update("currentLongitude",location.longitude)
+        docRef.update("currentLatititue", location.latitude)
+        docRef.update("currentLongitude", location.longitude)
 
 
-      if (  riderstatus   != "destinationlocation" ) {
+
+        if(  riderstatus == ""){
+
+            removepoly()
+
+            this.run(url, "GREEN")
+            this.run(url2, "RED")
+            println("riderlocation empty")
+
+            addCircle(riderlocation , 200F , "riderlocation")
 
 
-         println("hey its chnagde to location !!!!")
-
-          for (line in polylines) {
-
-              line.remove()
-          }
-          polylines.clear()
+        }else if ( riderstatus == "riderlocation"  ){
 
 
-          this.run(url, "GREEN")
-          println(url2)
-          this.run(url2, "RED")
+            removepoly()
+
+            if (riderboardedcheck == "true"){
+
+                removepoly()
+
+                this.run(url2, "RED")
+                addCircle(destinationlocation , 200F , "destinationlocation")
+
+            }
+
+        }
+
+        else if(riderstatus == "destinationlocation" ){
+
+            removepoly()
+
+            println( "riders reached at destination with pay to the rider ")
 
 
-      }
+        }
 
+
+
+
+
+
+
+
+
+
+
+
+//        if (riderstatus == "destinationlocation") {
+//
+//
+//            println("hey its chnagde to location !!!!")
+//
+//            for (line in polylines) {
+//
+//                line.remove()
+//            }
+//            polylines.clear()
+//
+//
+////            this.run(url, "GREEN")
+////            println(url2)
+////            this.run(url2, "RED")
+//
+//
+//        }
+//
+//
+//        if (riderstatus == "riderlocation") {
+//
+//            for (line in polylines) {
+//
+//                line.remove()
+//            }
+//            polylines.clear()
+//
+//
+//            this.run(url2, "RED")
+//            if (riderboardedcheck == "true") {
+//
+//                addCircle(destinationlocation, 200F, "destinationlocation")
+//
+//            }
+//
+//
+//        }
 
     }
-
-    override fun onRequestPermissionsResult(
+        override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
@@ -417,6 +466,16 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
         }
 
 
+    }
+
+
+    fun removepoly(){
+
+        for (line in polylines) {
+
+            line.remove()
+        }
+        polylines.clear()
     }
 
 

@@ -70,7 +70,7 @@ class SignupActivity : AppCompatActivity() {
 
             println("helloworld")
 
-            save(firstname, lastname, password, email, "aa")
+            save(firstname, lastname, password, email, imgData)
 
         }
 
