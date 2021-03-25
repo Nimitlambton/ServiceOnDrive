@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() , LocationListener {
     var currentlati :Double = 0.0
     var currentlongi : Double = 0.0
 
-
+//dummy
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
