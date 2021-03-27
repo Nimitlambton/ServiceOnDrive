@@ -43,6 +43,7 @@ private lateinit var decodedPolyLine: List<LatLng>
 private lateinit var  riderstatus : String
 //private lateinit var: CircleOptions
 lateinit var geofencingClient: GeofencingClient
+
 var polylines: MutableList<Polyline> = mutableListOf<Polyline>()
 private lateinit var locationManager: LocationManager
 private val locationPermissionCode = 2
@@ -179,12 +180,7 @@ class customerEnrouteMap : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnM
                   removepoly()
 
                     println( "riders reached at destination with pay to the rider ")
-
-
                 }
-
-
-
             } else {
 
 
