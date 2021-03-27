@@ -8,9 +8,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Base64
+import android.util.Patterns
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.labtest1.feeskeeper.serviceondrive.DbConfig.DriverDetails
 import com.example.labtest1.feeskeeper.serviceondrive.DbConfig.driverDetailsViewModel
@@ -24,7 +26,13 @@ lateinit var lastname :EditText
 lateinit var imageView: ImageView
 lateinit var SetImageBtn :Button
 var imgData = ""
+
+
 private lateinit var DriverDetailsViewModel: driverDetailsViewModel
+private lateinit var  currentUsers :  List<DriverDetails>
+private lateinit var  currentUser :  DriverDetails
+
+
 
 class SignupActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +46,23 @@ class SignupActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1)
 
         DriverDetailsViewModel = ViewModelProvider(this).get(com.example.labtest1.feeskeeper.serviceondrive.DbConfig.driverDetailsViewModel::class.java)
+
+
+        DriverDetailsViewModel.alldata.observe(this, Observer { words ->
+            // Update the cached copy of the words in the adapter.
+            words?.let {
+
+
+                currentUsers = it
+
+                println("helllllllooooworrllldd")
+                println("Size "+ currentUsers.size)
+
+            }
+
+        })
+
+
 
         var email :EditText
 
@@ -131,33 +156,50 @@ class SignupActivity : AppCompatActivity() {
         } else {
 
 
-            val userDetails = DriverDetails(
-                0,
-                firstname,
-                lastname,
-                email,
-                password,
-                imgData,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                "",
-                "",
-                "",
-                false
+            var result = validEmail(email)
+            var  exist = ifUserExist(email)
 
+            if (result) {
+                if ( !exist){
 
-            )
-            DriverDetailsViewModel.insert(userDetails)
-            Toast.makeText(this, "YAYA! You are finally registered ..!!", Toast.LENGTH_LONG)
-                .show()
-            finish()
+                    val userDetails = DriverDetails(
+                        0,
+                        firstname,
+                        lastname,
+                        email,
+                        password,
+                        imgData,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        "",
+                        "",
+                        "",
+                        false
+                    )
+                    DriverDetailsViewModel.insert(userDetails)
+                    Toast.makeText(this, "YAYA! You are finally registered ..!!", Toast.LENGTH_LONG)
+                        .show()
+                    finish()
+
+                }
+                else{
+
+                    Toast.makeText(this , "User already Exists!!" ,Toast.LENGTH_LONG).show()
+
+                }
+
+            }
+
+            else{
+
+                Toast.makeText(this , "Not a well formed email" ,Toast.LENGTH_LONG).show()
+            }
 
         }
-
 
     }
 
@@ -187,6 +229,25 @@ class SignupActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun   validEmail( email: String): Boolean {
+        val pattern = Patterns.EMAIL_ADDRESS;
+        return pattern.matcher(email).matches();
+    }
+
+
+    private fun ifUserExist(email: String) : Boolean {
+
+        var exits = false
+        currentUsers.map {
+
+            if(it.Email.equals(email) ) {
+
+                exits = true
+            }
+        }
+        return  exits
+    }
 
 
 }
